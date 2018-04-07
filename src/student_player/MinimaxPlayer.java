@@ -6,15 +6,15 @@ import tablut.TablutBoardState;
 import tablut.TablutPlayer;
 
 /** A player file submitted by a student. */
-public class StudentPlayer extends TablutPlayer {
+public class MinimaxPlayer extends TablutPlayer {
 
     /**
      * You must modify this constructor to return your student number. This is
      * important, because this is what the code that runs the competition uses to
      * associate you with your agent. The constructor should do nothing else.
      */
-    public StudentPlayer() {
-        super("260584555");
+    public MinimaxPlayer() {
+        super("MinimaxPlayer");
     }
 
     /**
