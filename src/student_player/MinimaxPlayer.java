@@ -33,9 +33,9 @@ public class MinimaxPlayer extends TablutPlayer {
         		
         long finishTime = System.currentTimeMillis() - startTime;
         
-        System.out.println("time: " + finishTime);
-        System.out.println("DtoC: "+Coordinates.distanceToClosestCorner(boardState.getKingPosition()));
-        System.out.println(minimaxTree.treeNodeCount);
+//        System.out.println("time: " + finishTime);
+//        System.out.println("DtoC: "+Coordinates.distanceToClosestCorner(boardState.getKingPosition()));
+//        System.out.println(minimaxTree.treeNodeCount);
 
 
         // Return your move to be processed by the server.
