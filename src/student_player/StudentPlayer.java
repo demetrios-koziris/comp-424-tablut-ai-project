@@ -1,5 +1,6 @@
 package student_player;
 
+import boardgame.Board;
 import boardgame.Move;
 import coordinates.Coordinates;
 import tablut.TablutBoardState;
@@ -18,46 +19,39 @@ public class StudentPlayer extends TablutPlayer {
         super("260584555");
     }
 
-    /**
-     * This is the primary method that you need to implement. The ``boardState``
-     * object contains the current state of the game, which your agent must use to
-     * make decisions.
-     */
+    // choose move based on iterative minimax with pruning
     public Move chooseMove(TablutBoardState boardState) {
+    	// keep track of time started and time limit
     	long startTime = System.currentTimeMillis();
     	long endTime = startTime + timeLimit;
     			
+    	// start minimaxPruning algorithm with depth of 2
     	int iterDepth = 2;
     	Move chosenMove = null;
 		try {
+			// if move is chosen without time limit reached, set it to chosenMove
 			chosenMove = new MinimaxPruneTree(iterDepth, boardState, endTime).getBestMove(player_id);
 		} catch (AtTimeLimitException e) {
-//			System.out.println("No time left while trying iterDepth " + iterDepth);
-			iterDepth--;
+			 System.out.println("Reached time limit while trying iterDepth 2");
 		}
-    	while ((System.currentTimeMillis() - startTime) < timeLimit/2) {
-//		while (iterDepth < 3) {
+		
+		// keep running minimax-pruning with higher depth as long as there is at least half the time left
+//    	while ((System.currentTimeMillis() - startTime) < timeLimit/2) {
+		while (iterDepth < 3) {
 			iterDepth++;
-//    		System.out.println("Trying iterDepth " + iterDepth + " at time " + (System.currentTimeMillis() - startTime));
-	    	try {
+			try {
+				// if move is chosen without time limit reached, set it to chosenMove
 	    		Move newMove = new MinimaxPruneTree(iterDepth, boardState, endTime).getBestMove(player_id);
 				chosenMove = newMove;
 			} catch (AtTimeLimitException e) {
-//				System.out.println("No time left while trying iterDepth " + iterDepth);
-    			iterDepth--;
+				 System.out.println("Reached time limit while trying iterDepth " + (iterDepth-1));
 			}
 
     	}
 	
-        
-
-        // Return your move to be processed by the server.
-    	return finishChooseMove(startTime, chosenMove, iterDepth);
-    }
-    
-    private Move finishChooseMove(long startTime, Move chosenMove, int iterDepth) {
-    	long finishTime = System.currentTimeMillis() - startTime;
-        System.out.println("time: " + finishTime + " with last succ iterDepth " + iterDepth);
+        // Return the move to be processed by the server.
+        System.out.println("Time: " + (System.currentTimeMillis() - startTime) + " with last successful iterDepth of " + iterDepth);
         return chosenMove;
     }
+
 }
