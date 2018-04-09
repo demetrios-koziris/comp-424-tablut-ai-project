@@ -22,12 +22,12 @@ public class MinimaxPruneTree {
 
 	
 	// This function differs only slightly from minimaxPrune as it needs to keep track of not just max and min
-	// but also the corresponding moves that led to those values
+	// but also the corresponding moves that led to those values. It is also biased to prefer winning moves at shorter depths
 	public TablutMove getBestMove(int boardPlayer) throws AtTimeLimitException {
 		// initialize a, b, and starting depth
-		double alpha = 0;
-		double beta = 1;
 		int depth = 0;
+		Valuation alpha = new Valuation(0.0, depth);
+		Valuation beta = new Valuation(1.0, depth);
 		
 		// if the player with the turn is a SWEDE then maximize
 		if (boardPlayer == TablutBoardState.SWEDE) {
@@ -39,9 +39,10 @@ public class MinimaxPruneTree {
 				TablutBoardState childBS = (TablutBoardState) this.headBoardState.clone();
 				childBS.processMove(move);
 				// recursively run minimaxPrune on the child board state
-				double childVal = minimaxPrune(childBS, depth+1, alpha, beta, (boardPlayer == 1 ? 0 : 1));
-				if (childVal > alpha) {
-					alpha = childVal;
+				Valuation childValuation = minimaxPrune(childBS, depth+1, alpha.clone(), beta.clone(), (boardPlayer == 1 ? 0 : 1));
+				if (childValuation != null && (childValuation.hVal > alpha.hVal || (childValuation.hVal == alpha.hVal && childValuation.depthAttained < alpha.depthAttained))) {
+					alpha.hVal = childValuation.hVal;
+					alpha.depthAttained = childValuation.depthAttained;
 					maxMove = move;
 				}
 			}
@@ -57,9 +58,10 @@ public class MinimaxPruneTree {
 				TablutBoardState childBS = (TablutBoardState) this.headBoardState.clone();
 				childBS.processMove(move);
 				// recursively run minimaxPrune on the child board state
-				double childVal = minimaxPrune(childBS, depth+1, alpha, beta, (boardPlayer == 1 ? 0 : 1));
-				if (childVal < beta) {
-					beta = childVal;
+				Valuation childValuation = minimaxPrune(childBS, depth+1, alpha.clone(), beta.clone(), (boardPlayer == 1 ? 0 : 1));
+				if (childValuation != null && (childValuation.hVal < beta.hVal || (childValuation.hVal == beta.hVal && childValuation.depthAttained < beta.depthAttained))) {
+					beta.hVal = childValuation.hVal;
+					beta.depthAttained = childValuation.depthAttained;
 					minMove = move;
 				}
 			}
@@ -68,17 +70,19 @@ public class MinimaxPruneTree {
 	}
 
 	// Implementation of minmax alg with alpha beta pruning
-	private double minimaxPrune(TablutBoardState nodeBS, int depth, double alpha, double beta, int boardPlayer) throws AtTimeLimitException {
+	private Valuation minimaxPrune(TablutBoardState nodeBS, int depth, Valuation alpha, Valuation beta, int boardPlayer) throws AtTimeLimitException {
+		boolean updated = false;
+		
 		if (System.currentTimeMillis() > endTime) {
 			throw new AtTimeLimitException("");
 		}
 		// if node is a leaf, then evaluate with h function
 		if (depth == this.maxDepth) {
-			return evaluate(nodeBS);
+			return new Valuation(evaluate(nodeBS), depth);
 		}
 		// if there is a winner return the winner (corresponds to the max and min h values of 0 or 1)
 		if (nodeBS.getWinner() == 0 || nodeBS.getWinner() == 1) {
-			return nodeBS.getWinner();
+			return new Valuation(nodeBS.getWinner(), depth);
 		}
 		if (boardPlayer == TablutBoardState.SWEDE) {
 			// if the player with the turn is a SWEDE then maximize
@@ -89,12 +93,19 @@ public class MinimaxPruneTree {
 				TablutBoardState childBS = (TablutBoardState) nodeBS.clone();
 				childBS.processMove(move);
 				// recursively run minimaxPrune on the child board state
-				double childVal = minimaxPrune(childBS, depth+1, alpha, beta, (boardPlayer == 1 ? 0 : 1));
-				alpha = Math.max(alpha, childVal);
-				if (alpha >= beta) {
-					// no need to search further, we can prune the remaining children
-					return beta;
+				Valuation childValuation = minimaxPrune(childBS, depth+1, alpha.clone(), beta.clone(), (boardPlayer == 1 ? 0 : 1));
+				if (childValuation != null && (childValuation.hVal > alpha.hVal || (childValuation.hVal == alpha.hVal && childValuation.depthAttained < alpha.depthAttained))) {
+					alpha.hVal = childValuation.hVal;
+					alpha.depthAttained = childValuation.depthAttained;
+					updated = true;
 				}
+				if (alpha.hVal > beta.hVal) {
+					// no need to search further, we can prune the remaining children
+					return null;
+				}
+			}
+			if (!updated) {
+				return new Valuation(alpha.hVal, depth+1);
 			}
 			return alpha;
 		}
@@ -106,12 +117,19 @@ public class MinimaxPruneTree {
 				TablutBoardState childBS = (TablutBoardState) nodeBS.clone();
 				childBS.processMove(move);
 				// recursively run minimaxPrune on the child board state
-				double childVal = minimaxPrune(childBS, depth+1, alpha, beta, (boardPlayer == 1 ? 0 : 1));
-				beta = Math.min(beta, childVal);
-				if (beta <= alpha) {
-					// no need to search further, we can prune the remaining children
-					return alpha;
+				Valuation childValuation = minimaxPrune(childBS, depth+1, alpha.clone(), beta.clone(), (boardPlayer == 1 ? 0 : 1));
+				if (childValuation != null && (childValuation.hVal < beta.hVal || (childValuation.hVal == beta.hVal && childValuation.depthAttained < beta.depthAttained))) {
+					beta.hVal = childValuation.hVal;
+					beta.depthAttained = childValuation.depthAttained;
+					updated = true;
 				}
+				if (beta.hVal < alpha.hVal) {
+					// no need to search further, we can prune the remaining children
+					return null;
+				}
+			}
+			if (!updated) {
+				return new Valuation(beta.hVal, depth+1);
 			}
 			return beta;
 		}

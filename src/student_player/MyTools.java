@@ -7,9 +7,4 @@ public class MyTools {
         return Math.random();
     }
     
-//    public TablutMove minimaxBestMove(SearchTree st) {
-//    	if (st.leaf) {
-//    		return evalBoard(st);
-//    	}
-//    }
 }

@@ -18,8 +18,8 @@ public class MinimaxTree {
 	public boolean leaf = false;
 	public int treeNodeCount = 1;
 	public double valuation;
-	private Random rand = new Random(1848);
-//	private Random rand = new Random(Math.round(Math.random()*2000));
+//	private Random rand = new Random(1848);
+	private Random rand = new Random(Math.round(Math.random()*2000));
 	
 	public MinimaxTree(int maxDepth, int depth, TablutBoardState boardState) {
 		this.boardState = boardState;

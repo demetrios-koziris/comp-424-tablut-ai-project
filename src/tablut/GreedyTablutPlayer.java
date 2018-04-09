@@ -9,9 +9,8 @@ import coordinates.Coord;
 import coordinates.Coordinates;
 
 public class GreedyTablutPlayer extends TablutPlayer {
-    private Random rand = new Random(1848);
-//    private Random rand = new Random(1840);
-//	private Random rand = new Random(Math.round(Math.random()*2000));
+//    private Random rand = new Random(1848);
+	private Random rand = new Random(Math.round(Math.random()*2000));
 
     public GreedyTablutPlayer() {
         super("GreedyPlayer");
